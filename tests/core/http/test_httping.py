@@ -3,10 +3,12 @@
 httping module tests
 """
 
+from multidict import CIMultiDict
 import pytest
 
 from hio import help
 from hio.core import http
+
 
 
 logger = help.ogler.getLogger()
@@ -53,6 +55,13 @@ def test_http_error():
                             b'  "title": "Validation Error",'
                             b'\n  "detail": "Bad mojo",\n  "fault": 50\n}')
 
+def test_parse_leader():
+    gen = http.httping.parseLeader(bytearray("Key: Value\n\n", 'ascii'))
+    assert next(gen) == CIMultiDict([('Key', 'Value')])
+    assert next(gen) == None
+    with pytest.raises(http.httping.HTTPException):
+        gen = http.httping.parseLeader(bytearray("KeyNoValue\n\n", 'ascii'))
+        next(gen)
 
 
 if __name__ == '__main__':

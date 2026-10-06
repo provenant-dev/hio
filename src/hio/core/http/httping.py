@@ -496,7 +496,10 @@ def parseLeader(raw, eols=(CRLF, LF), kind="leader header line", headers=None):
         del raw[:index] # remove used bytes
         if line:
             line = line.decode('iso-8859-1')  # convert to unicode string
-            key, value = line.split(': ', 1)
+            try:
+                key, value = line.split(': ', 1)
+            except ValueError:
+                raise HTTPException("Non-compliant HTTP header '{0}'".format(line))
             headers[key] = value
 
         if len(headers) > MAX_HEADERS:
